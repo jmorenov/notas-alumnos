@@ -1,3 +1,7 @@
+function calcularNota()
+
+end function
+
 Program MARKS
    
    implicit none
