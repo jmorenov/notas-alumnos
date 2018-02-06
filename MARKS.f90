@@ -1,62 +1,4 @@
-function calcular_soluciones(file, unit, N) result(CANSWER)
-   implicit none
-   
-   character (len=100), intent(in) :: file
-   integer, intent(in) :: unit, N
-
-   real :: CANSWER(N)
-   real :: num
-   integer :: i
-
-   open (UNIT=unit,FILE=file,STATUS='old', FORM='formatted')
-
-   do i=1, N
-      read (UNIT=unit, FMT='(E11.6)' ) num
-      CANSWER(i) = num 
-   end do
-end function
-
-function calcular_nota(CANSWER, line, N) result(CNOTA)
-   implicit none
-   
-   real, intent(in) :: CANSWER(N)
-   character (len=500), intent(in) :: line
-   integer, intent(in) :: N
-
-   character (len=2) :: CNOTA
-   integer :: NOTA, i, j
-   real :: ANSWER(N)
-   character (len=7) :: mantisa(N)
-   integer :: nmantisa(N)
-   character (len=3) :: exponente(N)
-   integer :: nexponente(N)
-
-   NOTA = 0
-   CNOTA = ''
-   j = 40
-
-   do i=1, N
-      mantisa(i) = line(j+1:j+7) !RESPUESTA1
-      mantisa(i) = trim(mantisa(i)) // '0000000'
-      read(mantisa(i),'(I7)') nmantisa(i)
-      
-      exponente(i) = line(j+8:j+10)
-      read(exponente(i),'(I3)') nexponente(i)
-         
-      ANSWER(i) = real(nmantisa(i))*(10**real(nexponente(i)))/(10**5)
-         
-      j=j+10
-      
-      if(abs((ANSWER(i) - CANSWER(i))/CANSWER(i)) < 10.**(-4.) ) then
-         NOTA = NOTA + 1 
-      else 
-         NOTA = NOTA
-      end if
-   end do
-
-   write(CNOTA, '(I2)') NOTA
-
-end function
+include 'FUNCTIONS.f90'
 
 Program MARKS
    
@@ -78,8 +20,6 @@ Program MARKS
    ! BUCLE RESPUESTAS - NOTA
    real :: CANSWER(N)
    character (len=2) :: CNOTA
-   character (len=2) :: calcular_nota
-   real, dimension(N) :: calcular_soluciones
    
    ! BUCLE 2º DNI
    integer :: K !ENTERO PARA CONTAR LAS ';'
@@ -87,7 +27,6 @@ Program MARKS
    character (len=500) :: line2 !line archivo 2
    
    character (len=8) :: DNI3
-   character (len=8) :: DNI4
    
    ! APERTURA DE ARCHIVOS UTILIZABLES
    open (UNIT=1,FILE="p1.TXT",STATUS="old")
@@ -95,11 +34,11 @@ Program MARKS
    open (UNIT=5,FILE="NOTASPERDIDAS.csv",STATUS="new")
   
    ! RESPUESTAS CORRECTAS
-   CANSWER = calcular_soluciones('solutions.csv', 3, N)
+   call calcular_soluciones('solutions.csv', 3, N, CANSWER)
    
    ! BUCLE PRINCIPAL
    EoF = 0
-   do 
+   do
 
       if(EoF < 0) then 
          exit
@@ -113,11 +52,10 @@ Program MARKS
       read(DNI,'(A)') DNI2
       
       ! COMPARACION Y EVALUACIÓN DEL ALUMNO
-      CNOTA = calcular_nota(CANSWER, line, N) 
+      call calcular_nota(CANSWER, line, N, CNOTA) 
       
       ! ASIGNACIÓN DE LA NOTA A LOS ALUMNOS
-      
-         !LECTURA ARCHIVO GRUPOS.CSV
+      ! LECTURA ARCHIVO GRUPOS.CSV
          
       open (UNIT=2,FILE="GRUPOS.csv",STATUS="old")
       read (UNIT=2, IOSTAT=FoE, FMT='(A)') line2
@@ -130,7 +68,7 @@ Program MARKS
             write(UNIT=5,FMT='(A)') DNI // ';' // CNOTA
             
             close(UNIT=2)
-             
+            
             exit
             
          endif
@@ -171,16 +109,12 @@ Program MARKS
          
             DNI3 = line2(i:j)
             
-            ! HAY QUE HACER UNA CORRECCIÓN DE ERRORES PARA LAS LETRAS INICIALES
-            ! print *, DNI3;
-            read(DNI3,'(A)') DNI4
-            
-            if(DNI2 == DNI4) then
+            if(DNI2 == DNI3) then
             
                write(UNIT=4, FMT='(A)') line2 // ';' // CNOTA
                
                close(UNIT=2)
-               
+
                exit
                
             endif
@@ -189,4 +123,7 @@ Program MARKS
 
    end do
    
+   close(UNIT=1)
+   close(UNIT=4)
+   close(UNIT=5)
 end program
