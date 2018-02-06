@@ -1,4 +1,60 @@
-function calcularNota()
+function calcular_soluciones(file, unit, N) result(CANSWER)
+   implicit none
+   
+   character (len=100), intent(in) :: file
+   integer, intent(in) :: unit, N
+
+   real :: CANSWER(N)
+   real :: num
+   integer :: i
+
+   open (UNIT=unit,FILE=file,STATUS='old', FORM='formatted')
+
+   do i=1, N
+      read (UNIT=unit, FMT='(E11.6)' ) num
+      CANSWER(i) = num 
+   end do
+end function
+
+function calcular_nota(CANSWER, line, N) result(CNOTA)
+   implicit none
+   
+   real, intent(in) :: CANSWER(N)
+   character (len=500), intent(in) :: line
+   integer, intent(in) :: N
+
+   character (len=2) :: CNOTA
+   integer :: NOTA, i, j
+   real :: ANSWER(N)
+   character (len=7) :: mantisa(N)
+   integer :: nmantisa(N)
+   character (len=3) :: exponente(N)
+   integer :: nexponente(N)
+
+   NOTA = 0
+   CNOTA = ''
+   j = 40
+
+   do i=1, N
+      mantisa(i) = line(j+1:j+7) !RESPUESTA1
+      mantisa(i) = trim(mantisa(i)) // '0000000'
+      read(mantisa(i),'(I7)') nmantisa(i)
+      
+      exponente(i) = line(j+8:j+10)
+      read(exponente(i),'(I3)') nexponente(i)
+         
+      ANSWER(i) = real(nmantisa(i))*(10**real(nexponente(i)))/(10**5)
+         
+      j=j+10
+      
+      if(abs((ANSWER(i) - CANSWER(i))/CANSWER(i)) < 10.**(-4.) ) then
+         NOTA = NOTA + 1 
+      else 
+         NOTA = NOTA
+      end if
+   end do
+
+   write(CNOTA, '(I2)') NOTA
 
 end function
 
@@ -16,26 +72,16 @@ Program MARKS
    character (len=500) :: line
    
    ! DNI
-   
    character (len=8) :: DNI !DNI caracteres
    character (len=8) :: DNI2 !DNI numero
    
    ! BUCLE RESPUESTAS - NOTA
-   
-   character (len=7) :: mantisa(N)
-   integer :: nmantisa(N)
-   
-   character (len=3) :: exponente(N)
-   integer :: nexponente(N)
-   
-   real :: ANSWER(N)
    real :: CANSWER(N)
-   
-   integer :: NOTA !NOTA DEL ALUMNO(i)
    character (len=2) :: CNOTA
+   character (len=2) :: calcular_nota
+   real, dimension(N) :: calcular_soluciones
    
    ! BUCLE 2º DNI
-   
    integer :: K !ENTERO PARA CONTAR LAS ';'
    character (len=1) :: pyc !PUNTO Y COMA
    character (len=500) :: line2 !line archivo 2
@@ -44,22 +90,12 @@ Program MARKS
    character (len=8) :: DNI4
    
    ! APERTURA DE ARCHIVOS UTILIZABLES
-   
    open (UNIT=1,FILE="p1.TXT",STATUS="old")
-   
-   open (UNIT=3,FILE="solutions1.csv",STATUS="old", FORM="formatted")
    open (UNIT=4,FILE="NOTAP1.csv",STATUS="new")
    open (UNIT=5,FILE="NOTASPERDIDAS.csv",STATUS="new")
   
    ! RESPUESTAS CORRECTAS
-   
-   do i=1, N
-      
-      read (UNIT=3, FMT='(E11.6)' ) num
-      
-      CANSWER(i) = num 
-      
-   end do
+   CANSWER = calcular_soluciones('solutions.csv', 3, N)
    
    ! BUCLE PRINCIPAL
    EoF = 0
@@ -76,45 +112,8 @@ Program MARKS
       DNI = line(1:8)
       read(DNI,'(A)') DNI2
       
-      ! BUCLE RESPUESTAS
-      
-      j=40
-      
-      do i=1,N
-      
-         mantisa(i) = line(j+1:j+7) !RESPUESTA1
-         mantisa(i) = trim(mantisa(i)) // '0000000'
-         read(mantisa(i),'(I7)') nmantisa(i)
-      
-         exponente(i) = line(j+8:j+10)
-         read(exponente(i),'(I3)') nexponente(i)
-         
-         ANSWER(i) = real(nmantisa(i))*(10**real(nexponente(i)))/(10**5)
-         
-         j=j+10
-      
-      end do
-      
       ! COMPARACION Y EVALUACIÓN DEL ALUMNO
-      
-      NOTA = 0
-      CNOTA = ''
-      
-      do i=1, N
-      
-         if(abs((ANSWER(i) - CANSWER(i))/CANSWER(i)) < 10.**(-4.) ) then
-         
-            NOTA = NOTA + 1 
-         
-         else 
-         
-            NOTA = NOTA
-            
-         end if
-      
-      end do
-      
-      write(CNOTA, '(I2)') NOTA 
+      CNOTA = calcular_nota(CANSWER, line, N) 
       
       ! ASIGNACIÓN DE LA NOTA A LOS ALUMNOS
       
