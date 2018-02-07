@@ -101,3 +101,36 @@ end do
    j=j-2
    DNI = line(i:j)
 end subroutine obtener_dni
+
+subroutine escribir_en_linea_archivo(unit, file, line_counter, line_a_escribir)
+   implicit none
+
+   integer, intent(in) :: unit
+   character (len=*), intent(in) :: file
+   integer, intent(in) :: line_counter
+   character (len=*), intent(in) :: line_a_escribir
+
+   integer :: i = 0, EoF, rec_length
+   character (len=500) :: line
+
+   !open (UNIT=unit, FILE=file, STATUS="old")
+   inquire (iolength=rec_length) line
+   open (UNIT=unit, FILE=file, access="direct", recl=rec_length, status="old", action="readwrite")
+
+   !do
+   !   read (UNIT=unit, IOSTAT=EoF, FMT='(A)') line
+   !   print *, line
+   !   i = i+1
+   !   if(EoF < 0) then
+   !      exit
+   !   endif
+
+   !   if(i == line_counter) then
+   !      write(UNIT=unit, FMT='(A)') 'Prueba'
+   !   endif
+   !end do
+
+   write(UNIT=unit, rec=line_counter) line_a_escribir
+
+   close(UNIT=unit)
+end subroutine escribir_en_linea_archivo
