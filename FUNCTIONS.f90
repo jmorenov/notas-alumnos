@@ -59,3 +59,45 @@ subroutine calcular_nota(CANSWER, line, N, CNOTA)
    write(CNOTA, '(I2)') NOTA
 
 end subroutine calcular_nota
+
+subroutine obtener_dni(line, DNI)
+   implicit none
+   
+   character (len=500), intent(out) :: line
+   character (len=8), intent(out) :: DNI
+
+   integer :: i, j, K !ENTERO PARA CONTAR LAS ';'
+   character (len=1) :: pyc !PUNTO Y COMA
+
+   K=0 !CONTADOR DE ';'
+   i=1 !EL VALOR FINAL DE 'i' A LA SALIDA DEL PRIMER BUCLE SERÁ LA POSICIÓN DE LA 3º ';' EN LA LINEA
+        
+   do while(K<=2) 
+      pyc = line(i:i)
+
+      if(pyc == ';') then
+         K=K+1
+      end if
+
+   i=i+1
+end do
+        
+   j=i !ENCADENAMOS EL ÚLTIMO VALOR DE 'i' CON EL PRIMERO DE 'j' PARA QUE CONTINUE EN LA MISMA PARTE DE LA LINEA
+   do while(K<=3)
+      pyc = line(j:j)
+    
+      if(pyc == ';') then
+         K=K+1
+        
+         if(k==3) then
+           exit
+         endif
+            
+        endif
+    
+        j=j+1
+   end do
+        
+   j=j-2
+   DNI = line(i:j)
+end subroutine obtener_dni
