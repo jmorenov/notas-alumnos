@@ -58,9 +58,9 @@ Program MARKS
    open (UNIT=2, FILE='GRUPOS.csv', STATUS='old')
    close(UNIT=2, status='delete')
 
-   call RENAME('Temp.csv','GRUPOS.csv')
-
    close(UNIT=1)
    close(UNIT=4)
    close(UNIT=5)
+
+   call RENAME('Temp.csv','GRUPOS.csv')
 end program
