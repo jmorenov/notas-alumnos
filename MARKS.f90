@@ -15,7 +15,7 @@ Program MARKS
    
    open (UNIT=1, FILE="p1.TXT",STATUS="old")
    open (UNIT=4, FILE="Temp.csv", STATUS="new")
-   ! open (UNIT=5, FILE="NOTASPERDIDAS.csv",STATUS="new")
+   open (UNIT=5, FILE="NOTASPERDIDAS.csv",STATUS="new")
   
    call calcular_soluciones('solutions.csv', 3, N, soluciones_correctas)
    
@@ -38,7 +38,9 @@ Program MARKS
          
          ! Notas perdidas
          if(EoF < 0) then
-         !   write(UNIT=5,FMT='(A)') DNI_soluciones // ';' // nota_final
+            if(DNI_soluciones /= "") then
+                write(UNIT=5,FMT='(A)') DNI_soluciones // ';' // nota_final
+            endif
             close(UNIT=2)
             exit
          endif
